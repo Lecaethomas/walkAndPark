@@ -13,6 +13,7 @@ click
 click-plugins==1.1.1
 cligj 
 colorama 
+libgdal-dev
 contourpy 
 cycler 
 debugpy 
