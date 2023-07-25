@@ -24,7 +24,6 @@ folium
 fonttools 
 geopandas 
 numpy
-GDAL==3.2.2.1
 gitdb==4.0.10
 GitPython==3.1.32
 idna 
