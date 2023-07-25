@@ -21,8 +21,8 @@ executing
 Fiona==1.9.1
 folium 
 fonttools 
-GDAL==3.6.4
 geopandas 
+GDAL==3.6.4
 gitdb==4.0.10
 GitPython==3.1.32
 idna 
