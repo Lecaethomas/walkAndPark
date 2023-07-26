@@ -74,7 +74,7 @@ st.title("Tentative de modélisation de l'accessibilité des parcs urbains toulo
 st.subheader("Quoi? :deciduous_tree:" )
 
 # Add some normal text describing the map
-st.write("Cette carte montre l'accessibilité à des parcs calculée pour des personnes non-PMR depuis le centre des carrés vers points représentant les parcs. Les carreaux font 200m*200m et correspondent à la base de données Filosofi de l'INSEE, laquelle permet de connaître les revenus moyens des ménages à l'échelle de cette unité qu'est le carreau. Un carreau signifie donc la présence de ménages mais suffisamment nombreux pour garantir leur anonymat.")
+st.write("Cette carte montre l'accessibilité à des parcs calculée pour des personnes non-PMR depuis le centre des carrés vers points représentant les parcs. Les carreaux font 200m*200m et correspondent à la base de données Filosofi de l'INSEE filtrée sur la commune de Toulouse, laquelle permet de connaître les revenus moyens des ménages à l'échelle de cette unité qu'est le carreau. Un carreau signifie donc la présence de ménages mais suffisamment nombreux pour garantir leur anonymat.")
 st.write("Les temps de déplacements sont représentés en utilisant une échelle de couleurs allant du jaune au marron, la première correspondant à un temps cours, la deuxième à un temps long.")
 
 # Display the folium map in the Streamlit app using streamlit_folium's folium_static function
@@ -84,19 +84,19 @@ st.write("Au delà de la question de l'accessibilité à la ressource spécifiqu
 
 st.subheader("Comment? :question:" )
 st.write("Techniquement le principe derrière cette modélisation est que l'on récupère le centroïde de chaque carreau, pour ensuite faire appel à l'API overpass (données OSM) permettant de récupérer les polygones correspondant aux parcs (leisure = parks) dans un rayon de 1km autour de chaque point.")
-st.write("L'algorithme fait ensuite appel à l'OSRM (Open Source Routing Machine) pour chaque point et les parcs correspondants pour calculer le temps nécessaire pour les rejoindre à pieds (modalité 'Route'). On peut ensuite extraire le parc le plus proche ainsi que le temps nécessaire pour s'y rendre.")
+st.write("L'algorithme fait ensuite appel à l'OSRM (Open Source Routing Machine) pour chaque point et les parcs correspondants pour calculer le temps nécessaire pour les rejoindre à pieds. On peut ensuite extraire le parc le plus proche (en temps de marche) ainsi que le temps nécessaire pour s'y rendre.")
 
 st.subheader("Améliorations :construction:")
 st.caption("Algo :computer:" )
-st.write("Il y a certainement la possibilité d'aller plus vite qu'actuellement en explorant les possibilités qu'offre l'OSRM (le traitement total prend 9h actuellement avec une instance OSRM sur une machine en local).")
-st.write("Les géométries des parcs sont récupérées sous forme de polygones puis résumés sous forme de centroïdes, ce qui pose des problèmes de représentativité pour des parcs de grand taille comme Pech-David.")
+st.write("Il y a certainement la possibilité d'aller plus vite qu'actuellement en explorant les options qu'offre l'OSRM (le traitement total prend 9h actuellement avec une instance OSRM sur une machine en local).")
+st.write("Les géométries des parcs sont récupérées sous forme de polygones puis résumées sous forme de centroïdes, ce qui pose des problèmes de représentativité pour des parcs de grand taille comme Pech-David.")
 st.caption("Data-visualisation :chart:"	)
 st.write("Côté dataviz il serait sympa de pouvoir cliquer sur un carreau et que le parc correspondant pop (par un highlight ou autre) mais pour l'instant je n'ai pas réussi à trouver la solution.")
 st.write("L'idéal serait de passer sous Mapbox.js, qui offre une plus grande accessibilité, de créer une interface dédiée, de servir les géométries avec une API........")
 st.write("Quitte à refaire le calcul, on pourrait garder le nom des parcs.")
 
-st.subheader("Autres")
-st.caption("Les sources :white_check_mark:" )
+st.subheader("Sources")
+st.caption("Les données :white_check_mark:" )
 st.write("Filosofi (Fichier Localisé Social et Fiscal), carreaux 200m | INSEE - 2015")
 st.write("Parcs OSM | API Overpass - utilisée le 22/07/2023")
 st.write("Réseau viaire OSM | GEOFABRIK - màj le 24/07/2023")
