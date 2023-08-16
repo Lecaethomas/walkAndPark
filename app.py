@@ -8,15 +8,15 @@ from streamlit_folium import folium_static
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Load the result GeoDataFrame from the shapefile
-result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results.shp")  # Change the file name to your polygons shapefile
-result_gdf = gpd.read_file(result_shapefile_path)
+result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results.shp")  # Change the file name to your polygons s hapefile
+result_gdf = gpd.read_file(result_shapefile_path) 
 
 # Load the park GeoDataFrame from the shapefile
-park_shapefile_path = os.path.join(current_dir, "data", "public_parks_.shp")
+park_shapefile_path = os.path.join(current_dir, "data", "public_parks_NEW.geojson")
 park_gdf = gpd.read_file(park_shapefile_path)
-
-# Create a folium map centered at the centroid of the first polygon in result_gdf
-m = folium.Map(location=[result_gdf["geometry"].centroid.y.mean(), result_gdf["geometry"].centroid.x.mean()], zoom_start=12)
+print(len(park_gdf))
+# Create a folium map centered on Toulouse
+m = folium.Map(location=[43.6, 1.43], zoom_start=12)
 
 # Create a colormap for the walking times (gradient of reds)
 min_walking_time = result_gdf["walking_ti"].min()
@@ -26,19 +26,19 @@ color_scale = folium.LinearColormap(colors=['#ffffd4', '#fed98e', '#fe9929', '#d
 # Create a folium layer for the parks
 parks_layer = folium.FeatureGroup(name="Parcs")
 
-# Add park polygons to the parks_layer
+# Add park points to the parks_layer
 for idx, row in park_gdf.iterrows():
     park_id = row["id"]
     park_polygon = row.geometry
     folium.GeoJson(
-        park_polygon.__geo_interface__,
+        park_polygon,
         style_function=lambda x: {"fillColor": "transparent", "color": "blue", "weight": 2},
         tooltip=f"Identifiant du parc: {park_id}",
         name=f"Park {park_id}",
     ).add_to(parks_layer)
-
+ 
 # Create another folium layer for the walking times
-walk_times_layer = folium.FeatureGroup(name="Temps à pieds")
+walk_times_layer = folium.FeatureGroup(name="Temps à pieds (carreaux de 200m*200m)")
 
 # Add the polygons with walking times to the walk_times_layer
 for idx, row in result_gdf.iterrows():
