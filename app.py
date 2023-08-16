@@ -8,21 +8,31 @@ from streamlit_folium import folium_static
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Load the result GeoDataFrame from the shapefile
-result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results.shp")  # Change the file name to your polygons s hapefile
+result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results.geojson")  # Change the file name to your polygons s hapefile
 result_gdf = gpd.read_file(result_shapefile_path) 
 
 # Load the park GeoDataFrame from the shapefile
-park_shapefile_path = os.path.join(current_dir, "data", "public_parks_NEW.geojson")
+park_shapefile_path = os.path.join(current_dir, "data", "public_parks.geojson")
 park_gdf = gpd.read_file(park_shapefile_path)
+# Load the "toulouse.geojson" file
+contours_shapefile_path = os.path.join(current_dir, "data", "toulouse.geojson")
+toulouse_gdf = gpd.read_file(contours_shapefile_path)
+
 print(len(park_gdf))
 # Create a folium map centered on Toulouse
 m = folium.Map(location=[43.6, 1.43], zoom_start=12)
 
-# Create a colormap for the walking times (gradient of reds)
-min_walking_time = result_gdf["walking_ti"].min()
-max_walking_time = result_gdf["walking_ti"].max()
-color_scale = folium.LinearColormap(colors=['#ffffd4', '#fed98e', '#fe9929', '#d95f0e', '#993404'], vmin=min_walking_time, vmax=max_walking_time)
 
+
+# Add toulouse polygon to the map
+for idx, row in toulouse_gdf.iterrows():
+    toulouse_polygon = row.geometry
+    folium.GeoJson(
+        toulouse_polygon,
+        style_function=lambda x: {"fillColor": "transparent", "color": "black", "weight": 3},
+        name="Commune de Toulouse",
+    ).add_to(m) 
+    
 # Create a folium layer for the parks
 parks_layer = folium.FeatureGroup(name="Parcs")
 
@@ -40,6 +50,11 @@ for idx, row in park_gdf.iterrows():
 # Create another folium layer for the walking times
 walk_times_layer = folium.FeatureGroup(name="Temps à pieds (carreaux de 200m*200m)")
 
+# Create a colormap for the walking times (gradient of reds)
+min_walking_time = result_gdf["walking_ti"].min()
+max_walking_time = result_gdf["walking_ti"].max()
+color_scale = folium.LinearColormap(colors=['#ffffd4', '#fed98e', '#fe9929', '#d95f0e', '#993404'], vmin=min_walking_time, vmax=max_walking_time)
+
 # Add the polygons with walking times to the walk_times_layer
 for idx, row in result_gdf.iterrows():
     polygon = row.geometry
@@ -56,6 +71,10 @@ for idx, row in result_gdf.iterrows():
         tooltip=f"Temps à pieds {walking_time} secondes  <br> Identifiant du parc correspondant : {park_cor}",
     ).add_to(walk_times_layer)
 
+
+
+    
+    
 # Add the parks_layer and walk_times_layer to the map
 parks_layer.add_to(m)
 walk_times_layer.add_to(m)
@@ -71,7 +90,7 @@ folium.LayerControl().add_to(m)
 ############ TEXT
 # Add a title to the app
 st.title("Tentative de modélisation de l'accessibilité des parcs urbains toulousains")
-st.subheader("Quoi? :deciduous_tree:" )
+st.subheader("De quoi parle-t-on? :deciduous_tree:" )
 
 # Add some normal text describing the map
 st.write("Cette carte montre l'accessibilité à des parcs calculée pour des personnes non-PMR depuis le centre des carrés vers les points représentant les parcs. Les carreaux font 200m*200m et correspondent à la base de données Filosofi de l'INSEE filtrée sur la commune de Toulouse. Cette base de données fournit différents indicateurs socio-économiques à l'échelle de cette unité qu'est le carreau. Un carreau signifie la présence de ménages mais suffisamment nombreux pour garantir leur anonymat.")
@@ -98,8 +117,9 @@ st.write("Quitte à refaire le calcul, on pourrait garder le nom des parcs.")
 st.subheader("Sources")
 st.caption("Les données :white_check_mark:" )
 st.write("Filosofi (Fichier Localisé Social et Fiscal), carreaux 200m | INSEE - 2015")
-st.write("Parcs OSM | API Overpass - utilisée le 22/07/2023")
-st.write("Réseau viaire OSM | GEOFABRIK - màj le 24/07/2023")
+st.write("Parcs OSM | API Overpass - utilisée le 22/07/2023") 
+st.write("Réseau viaire OSM | GEOFABRIK - utilisée le 24/07/2023")
+st.write("Contours de la commune de Toulouse - Admin express | IGN - 2020-01-16")
 st.caption("Le code :cat2:")
 st.write("[Le repo pour les calculs est ici](https://github.com/Lecaethomas/walkAndPark_backend/tree/master)")
 st.write("[Le repo pour la dataviz est ici](https://github.com/Lecaethomas/walkAndPark_backend/tree/master)")
