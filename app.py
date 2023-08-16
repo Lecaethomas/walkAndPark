@@ -21,6 +21,7 @@ toulouse_gdf = gpd.read_file(contours_shapefile_path)
 print(len(park_gdf))
 # Create a folium map centered on Toulouse
 m = folium.Map(location=[43.6, 1.43], zoom_start=12)
+ 
 
 
 
@@ -99,20 +100,20 @@ st.write("Les temps de déplacements sont représentés en utilisant une échell
 # Display the folium map in the Streamlit app using streamlit_folium's folium_static function
 folium_static(m)
 
-st.write("Au delà de la question de l'accessibilité à la ressource spécifique que sont les espaces verts, ce type d'analyse peut être conduit pour tous types de données (Base Permanente des Equipements, BD Topo ...) et permettre ainsi d'avoir un aperçut de la dotation des territoires en équipements ainsi que leur accessibilité voir d'aborder le [concept de la ville du 1/4 d'heure](https://www.moreno-web.net/wordpress/wp-content/uploads/2020/12/Livre-Blanc-2-Etude-ville-quart-heure-18.12.2020.pdf).")
+st.write("Au delà de la question de l'accessibilité à la ressource spécifique que sont les espaces verts, ce type d'analyse peut être conduit pour tous types de données (Base Permanente des Equipements, BD Topo ...) et permettre ainsi d'avoir un aperçut de la dotation des territoires en équipements ainsi que leur accessibilité et pourquoi pas d'aborder le [concept de la ville du 1/4 d'heure](https://www.moreno-web.net/wordpress/wp-content/uploads/2020/12/Livre-Blanc-2-Etude-ville-quart-heure-18.12.2020.pdf).")
 
-st.subheader("Comment? :question:" )
-st.write("Techniquement le principe derrière cette modélisation est que l'on récupère le centroïde de chaque carreau, pour ensuite faire appel à l'API overpass (données OSM) permettant de récupérer les polygones correspondant aux parcs (leisure = parks) dans un rayon de 1km autour de chaque point.")
+st.subheader("Comment :question:" )
+st.write("Techniquement le principe derrière cette modélisation est que l'on récupère le centroïde de chaque carreau, pour ensuite faire appel à l'API overpass (données OpenStreetMap) permettant de récupérer les polygones correspondant aux parcs dans un rayon de 1km autour de chaque point.")
 st.write("L'algorithme fait ensuite appel à l'OSRM (Open Source Routing Machine) pour chaque point et les parcs correspondants pour calculer le temps nécessaire pour les rejoindre à pieds. On peut ensuite extraire le parc le plus proche (en temps de marche) ainsi que le temps nécessaire pour s'y rendre.")
 
 st.subheader("Améliorations :construction:")
 st.caption("Algo :computer:" )
-st.write("Il y a certainement la possibilité d'aller plus vite qu'actuellement en explorant les options qu'offre l'OSRM (le traitement total prend 9h actuellement avec une instance OSRM sur une machine en local).")
-st.write("Les géométries des parcs sont récupérées sous forme de polygones puis résumées sous forme de centroïdes, ce qui pose des problèmes de représentativité pour des parcs de grand taille comme Pech-David.")
+st.write("- Il y a certainement la possibilité d'aller plus vite qu'actuellement en explorant les options qu'offre l'OSRM.")
+st.write("- Le traitement des géométries des parcs pourrait être affiné puisqu'il récupère un seul point sur le contour. Il y aurait peut-être la possibilité de récupérer toutes les entrées et trouver la plus proche pour chaque carreau en amont du calcul d'accessibilité.")
 st.caption("Data-visualisation :chart:"	)
-st.write("Côté dataviz il serait sympa de pouvoir cliquer sur un carreau et que le parc correspondant pop (par un highlight ou autre) mais pour l'instant je n'ai pas réussi à trouver la solution avec folium.")
-st.write("L'idéal serait de passer sous Mapbox.js, qui offre une plus grande accessibilité, de créer une interface dédiée, de servir les géométries avec une API........")
-st.write("Quitte à refaire le calcul, on pourrait garder le nom des parcs.")
+st.write("- Côté dataviz il serait sympa de pouvoir cliquer sur un carreau et que le parc correspondant pop (par un highlight ou autre) - et réciproquement - mais pour l'instant je n'ai pas réussi à trouver la solution avec folium.")
+st.write("- L'idéal serait de passer sous Mapbox.js, qui offre une plus grande accessibilité, de créer une interface dédiée, de servir les géométries avec une API........")
+st.write("- Quitte à refaire le calcul, on pourrait garder le nom des parcs.")
 
 st.subheader("Sources")
 st.caption("Les données :white_check_mark:" )
