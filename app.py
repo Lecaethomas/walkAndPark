@@ -9,7 +9,7 @@ import folium.plugins as plugins
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Load the result GeoDataFrame from the shapefile
-result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results.geojson")  # Change the file name to your polygons s hapefile
+result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results.geojson") 
 result_gdf = gpd.read_file(result_shapefile_path) 
 
 # Load the park GeoDataFrame from the shapefile
@@ -23,13 +23,13 @@ toulouse_gdf = gpd.read_file(contours_shapefile_path)
 m = folium.Map(location=[43.6, 1.43], zoom_start=12)
 
 ## Satellite Basemap
-
 folium.TileLayer(
     tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attr='Esri',
     name='Esri Satellite'
 ).add_to(m)
 
+##### City contours
 # Add toulouse polygon to the map
 for idx, row in toulouse_gdf.iterrows():
     toulouse_polygon = row.geometry
@@ -38,29 +38,22 @@ for idx, row in toulouse_gdf.iterrows():
         style_function=lambda x: {"fillColor": "transparent", "color": "black", "weight": 3},
         name="Commune de Toulouse",
     ).add_to(m) 
-    
-# Create a folium layer for the parks
-parks_layer = folium.FeatureGroup(name="Parcs")
-
-# Add park points to the parks_layer
-for idx, row in park_gdf.iterrows():
-    park_id = row["id"]
-    park_polygon = row.geometry
-    folium.GeoJson(
-        park_polygon,
-        style_function=lambda x: {"fillColor": "transparent", "color": "blue", "weight": 2},
-        tooltip=f"Identifiant du parc: {park_id}",
-        name=f"Park {park_id}",
-    ).add_to(parks_layer)
  
-# Create another folium layer for the walking times
+# Create another folium layer for the walking times 
 walk_times_layer = folium.FeatureGroup(name="Temps à pieds (carreaux de 200m*200m)")
 
+## add geocoder in case the user searches for his streets 
+plugins.Geocoder(
+    collapsed = False,
+    position = 'bottomleft',
+    add_marker = True).add_to(m) 
+ 
 # Create a colormap for the walking times (gradient of reds)
 min_walking_time = result_gdf["walking_ti"].min()
 max_walking_time = result_gdf["walking_ti"].max()
 color_scale = folium.LinearColormap(colors=['#ffffd4', '#fed98e', '#fe9929', '#d95f0e', '#993404'], vmin=min_walking_time, vmax=max_walking_time)
 
+#### GRID
 # Add the polygons with walking times to the walk_times_layer
 for idx, row in result_gdf.iterrows():
     polygon = row.geometry
@@ -77,13 +70,35 @@ for idx, row in result_gdf.iterrows():
         tooltip=f"Temps à pieds {walking_time} secondes  <br> Identifiant du parc correspondant : {park_cor}",
     ).add_to(walk_times_layer)
 
+##### PARCS
+# Create a folium layer for the parks
+parks_layer = folium.FeatureGroup(name="Parcs")
+
+# Add park points to the parks_layer
+for idx, row in park_gdf.iterrows():
+    park_id = row["id"]
+    park_point = row.geometry  # Assuming the geometry represents a single point
+    # Customize the styling options here
+    park_style = {
+        "radius": 5,  
+        "color": "Green", 
+        "fill_color": "Green", 
+        "fill_opacity": 0.2,
+    }
+    folium.CircleMarker(
+        location=[park_point.y, park_point.x],  
+        radius=park_style["radius"],
+        color=park_style["color"],
+        fill_color=park_style["fill_color"],
+        fill_opacity=park_style["fill_opacity"], 
+        tooltip=f"Identifiant du parc: {park_id}",
+        popup=f"Park {park_id}",
+    ).add_to(parks_layer)
 
 # Add the parks_layer and walk_times_layer to the map
-parks_layer.add_to(m)
 walk_times_layer.add_to(m)
+parks_layer.add_to(m)
 plugins.Fullscreen().add_to(m)
-
-
 # Add the colormap to the map
 color_scale.caption = "Temps à pieds (secondes)"
 color_scale.add_to(m)
@@ -104,10 +119,11 @@ st.write("Les temps de déplacements sont représentés en utilisant une échell
 folium_static(m)
 
 st.write("Au delà de la question de l'accessibilité à la ressource spécifique que sont les espaces verts, ce type d'analyse peut être conduit pour tous types de données (Base Permanente des Equipements, BD Topo ...) et permettre ainsi d'avoir un aperçut de la dotation des territoires en équipements ainsi que leur accessibilité et pourquoi pas d'aborder le [concept de la ville du 1/4 d'heure](https://www.moreno-web.net/wordpress/wp-content/uploads/2020/12/Livre-Blanc-2-Etude-ville-quart-heure-18.12.2020.pdf).")
+st.write("Enfin, un géocodeur, situé en bas à gauche de l'interface, permet à un utilisateur de facilement retrouver un lieu comme son domicile afin de mieux exploiter la cartographie.")
 
 st.subheader("Comment :question:" )
 st.write("Techniquement le principe derrière cette modélisation est que l'on récupère le centroïde de chaque carreau, pour ensuite faire appel à l'API overpass (données OpenStreetMap) permettant de récupérer les polygones correspondant aux parcs dans un rayon de 1km autour de chaque point.")
-st.write("L'algorithme fait ensuite appel à l'OSRM (Open Source Routing Machine) pour chaque point et les parcs correspondants pour calculer le temps nécessaire pour les rejoindre à pieds. On peut ensuite extraire le parc le plus proche (en temps de marche) ainsi que le temps nécessaire pour s'y rendre.")
+st.write("L'algorithme fait ensuite appel à l'OSRM (Open Source Routing Machine) pour chaque point et les parcs correspondants afin de calculer le temps nécessaire pour les rejoindre à pieds. On peut ensuite extraire le parc le plus proche (en temps de marche) ainsi que le temps nécessaire pour s'y rendre.")
 
 st.subheader("Améliorations :construction:")
 st.caption("Algo :computer:" )
@@ -126,6 +142,6 @@ st.write("Réseau viaire OSM | GEOFABRIK - utilisée le 24/07/2023")
 st.write("Contours de la commune de Toulouse - Admin express | IGN - 2020-01-16")
 st.caption("Le code :cat2:")
 st.write("[Le repo pour les calculs est ici](https://github.com/Lecaethomas/walkAndPark_backend/tree/master)")
-st.write("[Le repo pour la dataviz est ici](https://github.com/Lecaethomas/walkAndPark_backend/tree/master)")
+st.write("[Le repo pour la dataviz est ici](https://github.com/Lecaethomas/walkAndPark)")
 
 
