@@ -3,6 +3,7 @@ import streamlit as st
 import folium
 import geopandas as gpd
 from streamlit_folium import folium_static
+import folium.plugins as plugins
 
 # Get the absolute path of the current directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,13 +19,17 @@ park_gdf = gpd.read_file(park_shapefile_path)
 contours_shapefile_path = os.path.join(current_dir, "data", "toulouse.geojson")
 toulouse_gdf = gpd.read_file(contours_shapefile_path)
 
-print(len(park_gdf))
 # Create a folium map centered on Toulouse
 m = folium.Map(location=[43.6, 1.43], zoom_start=12)
+
+## Satellite Basemap
+
+folium.TileLayer(
+    tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attr='Esri',
+    name='Esri Satellite'
+).add_to(m)
  
-
-
-
 # Add toulouse polygon to the map
 for idx, row in toulouse_gdf.iterrows():
     toulouse_polygon = row.geometry
@@ -73,12 +78,11 @@ for idx, row in result_gdf.iterrows():
     ).add_to(walk_times_layer)
 
 
-
-    
-    
 # Add the parks_layer and walk_times_layer to the map
 parks_layer.add_to(m)
 walk_times_layer.add_to(m)
+plugins.Fullscreen().add_to(m)
+
 
 # Add the colormap to the map
 color_scale.caption = "Temps à pieds (secondes)"
@@ -86,7 +90,6 @@ color_scale.add_to(m)
 
 # Add the layer control to the map
 folium.LayerControl().add_to(m)
-
 
 ############ TEXT
 # Add a title to the app
