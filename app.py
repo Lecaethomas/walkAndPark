@@ -29,7 +29,7 @@ folium.TileLayer(
     attr='Esri',
     name='Esri Satellite'
 ).add_to(m)
- 
+
 # Add toulouse polygon to the map
 for idx, row in toulouse_gdf.iterrows():
     toulouse_polygon = row.geometry
