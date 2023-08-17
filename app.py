@@ -20,13 +20,15 @@ contours_shapefile_path = os.path.join(current_dir, "data", "toulouse.geojson")
 toulouse_gdf = gpd.read_file(contours_shapefile_path)
 
 # Create a folium map centered on Toulouse
-m = folium.Map(location=[43.6, 1.43], zoom_start=12)
+m = folium.Map(location=[43.6, 1.43], zoom_start=12, tiles=None) # Aucune basemap à l'origine pour pouvoir ajouter OSM avec les attributions que j'aurais choisies
+folium.raster_layers.TileLayer(tiles='openstreetmap', name='OpenStreetMap').add_to(m)
+
 
 ## Satellite Basemap
 folium.TileLayer(
     tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attr='Esri',
-    name='Esri Satellite'
+    attr='ESRI Satellite',
+    name='ESRI Satellite'
 ).add_to(m)
 
 ##### City contours
@@ -100,6 +102,7 @@ walk_times_layer.add_to(m)
 parks_layer.add_to(m)
 plugins.Fullscreen(force_separate_button = True).add_to(m)
 # Add the colormap to the map
+
 color_scale.caption = "Temps à pieds pour accéder au parc le plus proche (secondes)"
 color_scale.add_to(m)
 
@@ -119,7 +122,7 @@ st.write("Les temps de déplacements sont représentés en utilisant une échell
 folium_static(m)
 
 st.write("Au delà de la question de l'accessibilité à la ressource spécifique que sont les espaces verts, ce type d'analyse peut être conduit pour tous types de données (Base Permanente des Equipements, BD Topo ...) et permettre ainsi d'avoir un aperçut de la dotation des territoires en équipements ainsi que leur accessibilité et pourquoi pas d'aborder le [concept de la ville du 1/4 d'heure](https://www.moreno-web.net/wordpress/wp-content/uploads/2020/12/Livre-Blanc-2-Etude-ville-quart-heure-18.12.2020.pdf).")
-st.write("Enfin, un géocodeur, situé en bas à gauche de l'interface, permet à un utilisateur de facilement retrouver un lieu comme son domicile afin de mieux exploiter la cartographie.")
+st.write("Enfin, un géocodeur ([basé sur OSM/NOMINATIM](https://nominatim.org/)), situé en bas à gauche de l'interface, permet à un utilisateur de facilement retrouver un lieu comme son domicile (en renseignant son adresse) afin de mieux exploiter la cartographie.")
 
 st.subheader("Comment :question:" )
 st.write("Techniquement le principe derrière cette modélisation est que l'on récupère le centroïde de chaque carreau, pour ensuite faire appel à l'API overpass (données OpenStreetMap) permettant de récupérer les polygones correspondant aux parcs dans un rayon de 1km autour de chaque point.")
