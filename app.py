@@ -40,7 +40,7 @@ for idx, row in toulouse_gdf.iterrows():
     ).add_to(m) 
  
 # Create another folium layer for the walking times 
-walk_times_layer = folium.FeatureGroup(name="Temps à pieds (carreaux de 200m*200m)")
+walk_times_layer = folium.FeatureGroup(name="Carroyage - temps à pieds pour accéder au parc le plus proche")
 
 ## add geocoder in case the user searches for his streets 
 plugins.Geocoder(
@@ -51,7 +51,7 @@ plugins.Geocoder(
 # Create a colormap for the walking times (gradient of reds)
 min_walking_time = result_gdf["walking_ti"].min()
 max_walking_time = result_gdf["walking_ti"].max()
-color_scale = folium.LinearColormap(colors=['#ffffd4', '#fed98e', '#fe9929', '#d95f0e', '#993404'], vmin=min_walking_time, vmax=max_walking_time)
+color_scale = folium.LinearColormap(colors=['#ffffd4', '#fed98e', '#fe9929', '#d95f0e', '#993404'], vmin=round(min_walking_time), vmax=round(max_walking_time))
 
 #### GRID
 # Add the polygons with walking times to the walk_times_layer
@@ -67,7 +67,7 @@ for idx, row in result_gdf.iterrows():
             "weight": 2,
             "fillOpacity": 0.7,
         },
-        tooltip=f"Temps à pieds {walking_time} secondes  <br> Identifiant du parc correspondant : {park_cor}",
+        tooltip=f"Temps à pieds {round(walking_time)} secondes  <br> Identifiant du parc correspondant : {park_cor}",
     ).add_to(walk_times_layer)
 
 ##### PARCS
@@ -98,13 +98,13 @@ for idx, row in park_gdf.iterrows():
 # Add the parks_layer and walk_times_layer to the map
 walk_times_layer.add_to(m)
 parks_layer.add_to(m)
-plugins.Fullscreen().add_to(m)
+plugins.Fullscreen(force_separate_button = True).add_to(m)
 # Add the colormap to the map
-color_scale.caption = "Temps à pieds (secondes)"
+color_scale.caption = "Temps à pieds pour accéder au parc le plus proche (secondes)"
 color_scale.add_to(m)
 
 # Add the layer control to the map
-folium.LayerControl().add_to(m)
+folium.LayerControl(position = 'topleft').add_to(m)
 
 ############ TEXT
 # Add a title to the app
@@ -143,5 +143,3 @@ st.write("Contours de la commune de Toulouse - Admin express | IGN - 2020-01-16"
 st.caption("Le code :cat2:")
 st.write("[Le repo pour les calculs est ici](https://github.com/Lecaethomas/walkAndPark_backend/tree/master)")
 st.write("[Le repo pour la dataviz est ici](https://github.com/Lecaethomas/walkAndPark)")
-
-
