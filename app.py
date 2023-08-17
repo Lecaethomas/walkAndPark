@@ -134,10 +134,9 @@ st.write("- Il y a certainement la possibilité d'aller plus vite qu'actuellemen
 st.write("- Le traitement des géométries des parcs pourrait être affiné puisqu'il récupère un seul point sur le contour. Il y aurait peut-être la possibilité de récupérer toutes les entrées et trouver la plus proche pour chaque carreau en amont du calcul d'accessibilité.")
 st.caption("Data-visualisation :chart:"	)
 st.write("- Côté dataviz il serait sympa de pouvoir cliquer sur un carreau et que le parc correspondant pop (par un highlight ou autre) - et réciproquement - mais pour l'instant je n'ai pas réussi à trouver la solution avec folium.")
-st.write("- L'idéal serait de passer sous Mapbox.js, qui offre une plus grande accessibilité, de créer une interface dédiée, de servir les géométries avec une API........")
-st.write("- Quitte à refaire le calcul, on pourrait garder le nom des parcs.")
+st.write("- Quitte à refaire le calcul, on pourrait garder le nom des parcs - et les afficher")
 
-st.subheader("Sources")
+st.subheader("Sources :books:") 
 st.caption("Les données :white_check_mark:" )
 st.write("Filosofi (Fichier Localisé Social et Fiscal), carreaux 200m | INSEE - 2015")
 st.write("Parcs OSM | API Overpass - utilisée le 22/07/2023") 
