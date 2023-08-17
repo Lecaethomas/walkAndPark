@@ -92,7 +92,7 @@ for idx, row in park_gdf.iterrows():
         fill_color=park_style["fill_color"],
         fill_opacity=park_style["fill_opacity"], 
         tooltip=f"Identifiant du parc: {park_id}",
-        popup=f"Park {park_id}",
+        popup=f"ID : {park_id}",
     ).add_to(parks_layer)
 
 # Add the parks_layer and walk_times_layer to the map
