@@ -7,6 +7,12 @@ import folium.plugins as plugins
 from folium import DivIcon
 
 
+## define few functions
+def convert_seconds_to_minutes_seconds(seconds):
+    minutes = seconds // 60
+    remaining_seconds = seconds % 60
+    return f"{minutes} minutes {remaining_seconds} secondes"
+
 # Get the absolute path of the current directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -82,7 +88,7 @@ for idx, row in result_gdf.iterrows():
             "weight": 2,
             "fillOpacity": 0.7,
         },
-        tooltip=f"<strong>Temps à pieds pour accéder au parc le plus proche en 2023:</strong> {round(walking_time)} secondes<br><strong>Identifiant du parc correspondant:</strong> {park_cor}<br><br><strong>| Informations statistiques pour l'année 2015 | </strong></br><strong>Nombre de ménages en logement collectif:</strong> {round(men_coll)} <br><strong>Nombre de ménages pauvres: </strong> {round(men_pauv)}<br><strong> Nombre total de ménages: </strong> {round(men)}</br>",
+        tooltip=f"<strong>Temps à pieds pour accéder au parc le plus proche en 2023:</strong> {convert_seconds_to_minutes_seconds(round(walking_time))}<br><strong>Identifiant du parc correspondant:</strong> {park_cor}<br><br><strong>| Informations statistiques pour l'année 2015 | </strong></br><strong>Nombre de ménages en logement collectif:</strong> {round(men_coll)} <br><strong>Nombre de ménages pauvres: </strong> {round(men_pauv)}<br><strong> Nombre total de ménages: </strong> {round(men)}</br>",
         # popup=folium.Popup(html=popup_content, max_width=200),  # Adding the popup 
   
     ).add_to(walk_times_layer)  
