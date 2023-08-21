@@ -159,7 +159,7 @@ st.title("Tentative de modélisation de l'accessibilité des parcs urbains toulo
 st.subheader("De quoi parle-t-on? :deciduous_tree:" )
 
 # Add some normal text describing the map
-st.write("Cette carte montre l'accessibilité à des parcs calculée pour des personnes non-PMR depuis le centre des carrés vers les points représentant les parcs. Les carreaux font 200m*200m et correspondent à la base de données Filosofi de l'INSEE filtrée sur la commune de Toulouse. Cette base de données fournit différents indicateurs socio-économiques à l'échelle de cette unité qu'est le carreau. Un carreau signifie la présence de ménages mais suffisamment nombreux pour garantir leur anonymat.")
+st.write("Cette carte montre l'accessibilité à des parcs calculée pour des personnes n'ayant pas de problème de mobilité depuis le centre des carrés vers les points représentant les parcs. Les carreaux font 200m*200m et correspondent à la base de données Filosofi de l'INSEE filtrée sur la commune de Toulouse. Cette base de données fournit différents indicateurs socio-économiques à l'échelle de cette unité qu'est le carreau. Un carreau signifie la présence de ménages mais suffisamment nombreux pour garantir leur anonymat.")
 st.write("Les temps de déplacements sont représentés en utilisant une échelle de couleurs allant du jaune au marron, la première correspondant à un temps cours, la deuxième à un temps long.")
 
 # Display the folium map in the Streamlit, app using streamlit_folium's folium_static function
