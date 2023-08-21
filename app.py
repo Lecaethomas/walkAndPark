@@ -4,10 +4,20 @@ import folium
 import geopandas as gpd
 from streamlit_folium import folium_static
 import folium.plugins as plugins
+import math
 from folium import DivIcon
 
 
 ## define few functions
+def get_park_display(park_name, park_cor):
+    if park_name is not None:
+        return park_name
+    elif type(park_name) == float :
+        return park_cor
+    else : 
+        return park_cor 
+    
+
 def convert_seconds_to_minutes_seconds(seconds):
     minutes = seconds // 60
     remaining_seconds = seconds % 60
@@ -17,11 +27,11 @@ def convert_seconds_to_minutes_seconds(seconds):
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Load the result GeoDataFrame from the shapefile
-result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results.geojson") 
+result_shapefile_path = os.path.join(current_dir, "data", "grid_walk_results_2.geojson") 
 result_gdf = gpd.read_file(result_shapefile_path) 
 
 # Load the park GeoDataFrame from the shapefile
-park_shapefile_path = os.path.join(current_dir, "data", "public_parks.geojson")
+park_shapefile_path = os.path.join(current_dir, "data", "public_parks_2.geojson")
 park_gdf = gpd.read_file(park_shapefile_path)
 # Load the "toulouse.geojson" file
 contours_shapefile_path = os.path.join(current_dir, "data", "toulouse.geojson")
@@ -59,39 +69,48 @@ plugins.Geocoder(
     add_marker = True).add_to(m) 
  
 # Create a colormap for the walking times (gradient of reds)
-min_walking_time = result_gdf["walking_ti"].min()
-max_walking_time = result_gdf["walking_ti"].max()
+min_walking_time = result_gdf["walking__2"].min()
+max_walking_time = result_gdf["walking__2"].max()
 color_scale = folium.LinearColormap(colors=['#ffffd4', '#fed98e', '#fe9929', '#d95f0e', '#993404'], vmin=round(min_walking_time), vmax=round(max_walking_time))
 
 #### GRID
-
+print(result_gdf["park_nam_4"])
 # Add the polygons with walking times to the walk_times_layer
+# ...
+
 for idx, row in result_gdf.iterrows():
     polygon = row.geometry
-    walking_time = row["walking_ti"]
-    park_cor = row["park_id"]
+    walking_time = row["walking__2"]
+    park_cor = row["park_id_ma"]
+    park_name = row["park_nam_4"]
     men_coll = row["Men_coll"]
-    men_pauv = row["Men_pauv"]
     men = row["Men"]
     z_index = int(1000 - walking_time) if walking_time >= 0 else 0
 
-    # popup_content = f"Temps à pieds {round(walking_time)} secondes<br>Identifiant du parc correspondant: {park_cor}<br>Nombre de ménages en logement collectif: {round(men_coll)}"
+    if park_name is None or park_name == '1':
+        park_display = park_cor
+    else:
+        park_display = park_name
+
     folium.GeoJson(
         polygon.__geo_interface__,
-        overlay=True,  # Ensure each GeoJson feature is a separate overlay
-        highlight_function= lambda feat: {'fillColor': 'yellow'},
-        smooth_factor=0,  # Disable smoothing to prevent artifacts
-
-        style_function=lambda x, walking_time=walking_time: {
+        overlay=True,
+        highlight_function=lambda feat: {'fillColor': 'yellow'},
+        smooth_factor=0, 
+        style_function=lambda x, walking_time=walking_time: { 
             "fillColor": color_scale(walking_time),
             "color": color_scale(walking_time),
             "weight": 2,
             "fillOpacity": 0.7,
         },
-        tooltip=f"<strong>Temps à pieds pour accéder au parc le plus proche en 2023:</strong> {convert_seconds_to_minutes_seconds(round(walking_time))}<br><strong>Identifiant du parc correspondant:</strong> {park_cor}<br><br><strong>| Informations statistiques pour l'année 2015 | </strong></br><strong>Nombre de ménages en logement collectif:</strong> {round(men_coll)} <br><strong>Nombre de ménages pauvres: </strong> {round(men_pauv)}<br><strong> Nombre total de ménages: </strong> {round(men)}</br>",
-        # popup=folium.Popup(html=popup_content, max_width=200),  # Adding the popup 
-  
-    ).add_to(walk_times_layer)  
+        tooltip=(
+            f"<strong>Temps à pieds pour accéder au parc le plus proche en 2023: </strong> "
+            f"{convert_seconds_to_minutes_seconds(round(walking_time))}<br>"
+            f"<strong>Nom ou à défaut identifiant du parc le plus proche: </strong> "
+            f"{park_display}<br>"
+            f"<strong>Nombre total de ménages en 2015: </strong>{round(men)}<i> dont {round(men_coll)} en logement collectif</i></br>"
+        )
+    ).add_to(walk_times_layer)
 
 ##### PARCS
 # Create a folium layer for the parks
@@ -99,8 +118,13 @@ parks_layer = folium.FeatureGroup(name="Parcs", show = False)
 
 # Add park points to the parks_layer
 for idx, row in park_gdf.iterrows():
-    park_id = row["id"]
+    park__id = row["id"]
+    park_name = row["name"]
     park_point = row.geometry  # Assuming the geometry represents a single point
+    if park_name is None or park_name == '1':
+        park_display = park__id
+    else:
+        park_display = park_name
     # Customize the styling options here
     park_style = {
         "radius": 5,  
@@ -114,11 +138,10 @@ for idx, row in park_gdf.iterrows():
         color=park_style["color"],
         fill_color=park_style["fill_color"],
         fill_opacity=park_style["fill_opacity"], 
-        tooltip=f"Identifiant du parc: {park_id}",
-        popup=f"ID : {park_id}",
+        tooltip=f"Nom ou à défaut identifiant du parc: {park_display}", 
     ).add_to(parks_layer)
 
-# Add the parks_layer and walk_times_layer to the map
+# Add the parks_layer and walk_times_layer to the map  
 walk_times_layer.add_to(m)
 parks_layer.add_to(m)
 plugins.Fullscreen(force_separate_button = True).add_to(m)
@@ -145,7 +168,6 @@ folium_static(m)
 ## Definitions 
 with st.expander("Voir les définitions"):
     st.write("* Un ménage, au sens du recensement de la population, désigne l'ensemble des personnes qui partagent la même résidence principale, sans que ces personnes soient nécessairement unies par des liens de parenté. Un ménage peut être constitué d'une seule personne.")
-    st.write("* Un individu (ou un ménage) est considéré comme pauvre lorsqu'il vit dans un ménage dont le niveau de vie est inférieur au seuil de pauvreté. En France le seuil est fixé à 60 % du niveau de vie médian.")
 
 st.write("Au delà de la question de l'accessibilité à la ressource spécifique que sont les espaces verts, ce type d'analyse peut être conduit pour tous types de données (Base Permanente des Equipements, BD Topo ...) et permettre ainsi d'avoir un aperçut de la dotation des territoires en équipements ainsi que leur accessibilité et pourquoi pas d'aborder le [concept de la ville du 1/4 d'heure](https://www.moreno-web.net/wordpress/wp-content/uploads/2020/12/Livre-Blanc-2-Etude-ville-quart-heure-18.12.2020.pdf).")
 st.write("Enfin, un géocodeur ([basé sur OSM/NOMINATIM](https://nominatim.org/)), situé en bas à droite de l'interface, permet à un utilisateur de facilement retrouver un lieu comme son domicile (en renseignant son adresse) afin de mieux exploiter la cartographie.")
@@ -157,17 +179,19 @@ st.write("L'algorithme fait ensuite appel à l'OSRM (Open Source Routing Machine
 st.subheader("Améliorations :construction:")
 st.caption("Algo :computer:" )
 st.write("- Il y a certainement la possibilité d'aller plus vite qu'actuellement en explorant les options qu'offre l'OSRM.")
-st.write("- Le traitement des géométries des parcs pourrait être affiné puisqu'il récupère un seul point sur le contour. Il y aurait peut-être la possibilité de récupérer toutes les entrées et trouver la plus proche pour chaque carreau en amont du calcul d'accessibilité.")
+st.write("- Le traitement des géométries des parcs pourrait être affiné puisqu'il récupère un seul point sur la surface. Il y aurait peut-être la possibilité de récupérer toutes les entrées (par intersection des cheminements piétons OSM et les contours des parcs) et trouver la plus proche pour chaque carreau en amont du calcul d'accessibilité.")
 st.caption("Data-visualisation :chart:"	)
 st.write("- Côté dataviz il serait sympa de pouvoir cliquer sur un carreau et que le parc correspondant pop (par un highlight ou autre) - et réciproquement - mais pour l'instant je n'ai pas réussi à trouver la solution avec folium.")
-st.write("- Quitte à refaire le calcul, on pourrait garder le nom des parcs - et les afficher au survol par le curseur.")
+st.write("- L'idéal serait d'utiliser Mapbox GL JS pour une (beaucoup) plus grande customisation mais ça demanderait plus de temps et je ne pourrais pas l'héberger sur streamlit qui est parfait pour réaliser un brouillon comme celui-ci.")
+st.write("- Afin d'enrichir cette visualisation - mais aussi pour satisfaire mon appétence pour la télédétection - nous pourrions utiliser l'API Google Earth Engine (GEE) pour afficher une image thermique (bande 6 de Landsat 7) permettant de localiser les Ilots de Chaleur Urbain (ICU).")
+st.write("- Tout retour utilisateur est bienvenu :wink:")
 
 st.subheader("Sources :books:") 
 st.caption("Les données :white_check_mark:" )
 st.write("Filosofi (Fichier Localisé Social et Fiscal), carreaux 200m | INSEE - 2015")
 st.write("Parcs OSM | API Overpass - utilisée le 22/07/2023") 
 st.write("Réseau viaire OSM | GEOFABRIK - 24/07/2023")
-st.write("Contours de la commune de Toulouse - Admin express | IGN - 2020-01-16")
+st.write("Contours de la commune de Toulouse - Admin express | IGN - 2020-01-16") 
 st.caption("Le code :cat2:")
 st.write("[Le repo pour les calculs est ici](https://github.com/Lecaethomas/walkAndPark_backend/tree/master)")
 st.write("[Le repo pour la dataviz est ici](https://github.com/Lecaethomas/walkAndPark)")
